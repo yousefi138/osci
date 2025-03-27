@@ -1,0 +1,13 @@
+Package: osci
+Title: An R wrapper for OSCA (OmicS-data-based Complex trait Analysis)
+Version: 0.1.0
+Date: 2025-03-27
+Authors: person("Paul", "Yousefi", email = "paul.yousefi@bristol.ac.uk", role = c("aut", "cre"))
+Maintainer: Paul Yousefi <paul.yousefi@bristol.ac.uk>
+Description: An R wrapper for OSCA (OmicS-data-based Complex trait Analysis)
+Depends: data.table
+Suggests: RCurl
+License: Artistic-2.0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.0
