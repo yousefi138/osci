@@ -1,29 +1,28 @@
 ## ----globals -------------------------------------------------------------
-packages <- c("tidyverse", "data.table") 
-lapply(packages, require, character.only=T)
+library(osci)
 
 ## ----simulate.data-------------------------------------------------------------
 
 # make a pheno dataset from r dataset "women" looking at the height variable
 data(women) 
-pheno <- women %>%
-			mutate(
-				FID = paste0("x",seq(1, nrow(women))),
-				IID = FID) %>%
-			dplyr::select(FID, IID, height)			
+id <- paste0("x",seq(1, nrow(women)))
+pheno <- data.frame(
+            FID = id,
+            IID = id,
+            height = women$height) 
 
 # simulate a dnam matrix of n=28794 CpGs available on chromosome 11
 # 	on the human 450k array
 
 # remotes::install_github("perishky/meffil") # for meffil install
-annot <- meffil::meffil.get.features(featureset = "450k") %>%
-			filter(chromosome == "chr11")
+annot <- subset(
+            meffil::meffil.get.features(featureset = "450k"),
+                chromosome == "chr11")
 
 set.seed(42)
 betas <- matrix(data = runif(nrow(annot)*nrow(pheno)), 
 				nrow = nrow(pheno), ncol = nrow(annot))
 colnames(betas) <- annot$name
-
 
 # make the orm combining pheno IDs and DNAm obs
 orm <- cbind(pheno[, c('FID', 'IID'),drop=F], betas)
@@ -44,16 +43,10 @@ str(orm[,1:10])
 # $ cg00009088: num  0.71936 0.00788 0.37549 0.51441 0.00157 ...
 # $ cg00012397: num  0.667427 0.000239 0.20857 0.933034 0.925645 ...
 # $ cg00013006: num  0.96261 0.73986 0.73325 0.53576 0.00227 ...
+## ---- -------------------------------------------------------------
+osci.orms <- osci.write.orm(df = orm, filename = "height.orm.txt")
 
 ## ----write.orms -------------------------------------------------------------
-msg <- function(..., verbose=T) {
-    if (verbose) {
-        x <- paste(list(...))
-        name <- sys.call(sys.parent(1))[[1]]
-        cat(paste("[", name, "]", sep=""), date(), x, "\n")
-    }
-}
-
 write.orm <- function(df, file.no.suffix){
 
 	stopifnot(is.data.frame(df))
