@@ -44,7 +44,7 @@ osci.write.orm <- function(df, filename){
     system(orm)
 
     list(filename = filename,
-        bod = bod,
-        orm = orm,
+        myorm = myorm,
+        osca.calls = list(bod = bod, orm = orm),
         osca.files = setdiff(list.files(), preexist))
 }
