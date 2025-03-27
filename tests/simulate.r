@@ -43,59 +43,40 @@ str(orm[,1:10])
 # $ cg00009088: num  0.71936 0.00788 0.37549 0.51441 0.00157 ...
 # $ cg00012397: num  0.667427 0.000239 0.20857 0.933034 0.925645 ...
 # $ cg00013006: num  0.96261 0.73986 0.73325 0.53576 0.00227 ...
-## ---- -------------------------------------------------------------
-osci.orms <- osci.write.orm(df = orm, filename = "height.orm.txt")
 
-## ----write.orms -------------------------------------------------------------
-write.orm <- function(df, file.no.suffix){
+## ----make.orm.files------------------------------------------------
+orm.files <- osci.write.orm(df = orm, filename = "height.orm.txt")
 
-	stopifnot(is.data.frame(df))
-	stopifnot(all(colnames(df)[1:2] == c('FID', 'IID')))
+# orm.files
+# $filename
+# [1] "height.orm.txt"
+# 
+# $myorm
+# [1] "height.orm-myorm"
+# 
+# $osca.calls
+# $osca.calls$bod
+# [1] "osca --efile height.orm.txt --methylation-beta --make-bod --out height.orm-myprofile"
+# 
+# $osca.calls$orm
+# [1] "osca --befile height.orm-myprofile --make-orm --out height.orm-myorm"
+# 
+# $osca.files
+# [1] "height.orm-myorm_1_1.log"     "height.orm-myorm.orm.bin"    
+# [3] "height.orm-myorm.orm.id"      "height.orm-myorm.orm.N.bin"  
+# [5] "height.orm-myprofile_1_1.log" "height.orm-myprofile.bod"    
+# [7] "height.orm-myprofil
 
-	txt <- paste0(file.no.suffix, ".txt")
-	myprofile <- paste0(file.no.suffix, "-myprofile")
-	myorm <- paste0(file.no.suffix, "-myorm")
-
-	msg("Writing ORM data to text file:", basename(txt))
-	data.table::fwrite(df, 
-		file = txt, 
-		sep=' ', 
-		row.names = F, 
-		col.names = T)
-	
-	msg("Using osca to make bod files:", basename(myprofile))	
-	system(paste0("osca --efile ", txt,  
-  			" --methylation-beta --make-bod --out ", myprofile))
-	
-	msg("Using osca to make orm files:", basename(myorm))		
-  	system(paste0("osca --befile ", myprofile,
-  			" --make-orm --out ", myorm))
-}
-
-write.orm(df = orm, file.no.suffix = "height.orm")
-list.files()
-# [1] "height.orm-myorm_1_1.log"     "height.orm-myorm.orm.bin"
-# [3] "height.orm-myorm.orm.id"      "height.orm-myorm.orm.N.bin"
-# [5] "height.orm-myprofile_1_1.log" "height.orm-myprofile.bod"
-# [7] "height.orm-myprofile.oii"     "height.orm-myprofile.opi"
-# [9] "height.orm.txt"
-
-write_delim(pheno, file = "height.pheno.txt", quote = "none")
-list.files()
-# [1] "height.orm-myorm_1_1.log"     "height.orm-myorm.orm.bin"
-# [3] "height.orm-myorm.orm.id"      "height.orm-myorm.orm.N.bin"
-# [5] "height.orm-myprofile_1_1.log" "height.orm-myprofile.bod"
-# [7] "height.orm-myprofile.oii"     "height.orm-myprofile.opi"
-# [9] "height.orm.txt"               "height.pheno.txt"
+## ----write.pheno.file---------------------------------------------
+write.table(pheno, 
+    file = "pheno.txt", 
+    sep = "\t",
+    row.names = FALSE, 
+    col.names = TRUE, 
+    quote = FALSE)
 
 ## ----run remls -------------------------------------------------------------
-system(paste0("osca --reml --orm ", "height.orm-myorm", 
-		" --pheno ", "height.pheno.txt", " --out ", "height-reml" ))
+remls <- osci.reml(orm.files$myorm, "pheno.txt", out = "height-reml")
 
-list.files()
-# [1] "height-reml_1_1.log"          "height-reml.rsq"
-# [3] "height.orm-myorm_1_1.log"     "height.orm-myorm.orm.bin"
-# [5] "height.orm-myorm.orm.id"      "height.orm-myorm.orm.N.bin"
-# [7] "height.orm-myprofile_1_1.log" "height.orm-myprofile.bod"
-# [9] "height.orm-myprofile.oii"     "height.orm-myprofile.opi"
-#[11] "height.orm.txt"               "height.pheno.txt"
+
+

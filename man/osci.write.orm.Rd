@@ -7,7 +7,7 @@
 osci.write.orm(df, filename)
 }
 \arguments{
-\item{df}{A data frame}
+\item{df}{A data frame with FID and IID as the first two columns.}
 
 \item{filename}{a file name with a .txt extension for saving the data frame in osca format.}
 }
