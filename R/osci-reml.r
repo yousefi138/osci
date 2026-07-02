@@ -1,24 +1,18 @@
-#' Run OSCA reml analysis
+#' Run OSCA REML analysis
 #' 
-#' This function runs the reml analysis in OSCA.
+#' Performs REML analysis in OSCA
+#' for a single omic.
 #'
-#' @param myord the base name of the orm files 
-#' @param pheno a phenotype file with FID, IID columns and a phenotype column
-#' @param out the base name of the output files
-#' @return A text file with the same name as the input file, a bod file, and an orm file.
+#' @param x Either an ORM filename or a phenotype vector or matrix.
+#' If the former, then osci.reml.files is called, otherwise osci.reml.matrices is called.
+#' @param ... Additional arguments to be passed to osci.reml.files or osci.reml.matrices.
+#' @return Returned outputs depend on the value of x, either osci.reml.files or osci.reml.matrices outputs.
 #' 
 #' @export
-osci.reml <- function(myorm, pheno, out){
-	stopifnot(file.exists(pheno))	
-	stopifnot(paste0(myorm, ".orm.bin") %in% list.files(dirname(myorm)))
-    preexist <- list.files(dirname(myorm))
-
-	msg("Using osca to run reml for:", myorm)		
-  	reml <- paste0("osca --reml --orm ", myorm, 
-		" --pheno ", pheno, " --out ", out )
-    system(reml)
-
-    list(myorm = myorm,
-        osca.calls = list(reml = reml),
-        osca.files = setdiff(list.files(), preexist))
+osci.reml = function(x, ...) {
+  if (is.character(x)) 
+    osci.reml.files(x, ...)
+  else
+    osci.reml.matrices(x, ...)
 }
+

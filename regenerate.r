@@ -5,14 +5,12 @@
 
 #' install.packages("devtools")
 #' devtools::install_github("klutometis/roxygen")
-packages <- c("devtools", "roxygen2", "knitr")
+packages <- c("remotes", "roxygen2", "knitr")
 lapply(packages, require, character.only=T)
 
-
-document("osci")
+roxygen2::roxygenise("osci")
 
 system("R CMD INSTALL osci")
-reload(inst("osci"))
 
 ## inherited meffil code for running tests
 # source("osci/data-raw/globals.r",chdir=T)

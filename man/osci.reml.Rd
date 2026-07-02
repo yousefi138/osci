@@ -2,20 +2,20 @@
 % Please edit documentation in R/osci-reml.r
 \name{osci.reml}
 \alias{osci.reml}
-\title{Run OSCA reml analysis}
+\title{Run OSCA REML analysis}
 \usage{
-osci.reml(myorm, pheno, out)
+osci.reml(x, ...)
 }
 \arguments{
-\item{pheno}{a phenotype file with FID, IID columns and a phenotype column}
+\item{x}{Either an ORM filename or a phenotype vector or matrix.
+If the former, then osci.reml.files is called, otherwise osci.reml.matrices is called.}
 
-\item{out}{the base name of the output files}
-
-\item{myord}{the base name of the orm files}
+\item{...}{Additional arguments to be passed to osci.reml.files or osci.reml.matrices.}
 }
 \value{
-A text file with the same name as the input file, a bod file, and an orm file.
+Returned outputs depend on the value of x, either osci.reml.files or osci.reml.matrices outputs.
 }
 \description{
-This function runs the reml analysis in OSCA.
+Performs REML analysis in OSCA
+for a single omic.
 }

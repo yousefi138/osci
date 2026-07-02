@@ -17,34 +17,42 @@ msg <- function(..., verbose=T) {
 #' @export
 osci.write.orm <- function(df, filename){
 
-	stopifnot(is.data.frame(df))
-	stopifnot(all(colnames(df)[1:2] == c('FID', 'IID')))
-    stopifnot(sub(".*(\\.txt)$", "\\1", filename) == ".txt")
-
-	file.no.suffix <- sub("\\.txt$", "", filename)
-	myprofile <- paste0(file.no.suffix, "-myprofile")
-	myorm <- paste0(file.no.suffix, "-myorm")
-    preexist <- list.files()
-
-	msg("Writing ORM data to text file:", filename)
-	data.table::fwrite(df, 
-		file = filename, 
-		sep=' ', 
-		row.names = F, 
-		col.names = T)
-	
-	msg("Using osca to make bod files:", myprofile)
-    bod <- paste0("osca --efile ", filename,  
-  			" --methylation-beta --make-bod --out ", myprofile)	
-	system(bod)
-	
-	msg("Using osca to make orm files:", myorm)		
-  	orm <- paste0("osca --befile ", myprofile,
-  			" --make-orm --out ", myorm)
-    system(orm)
-
-    list(filename = filename,
-        myorm = myorm,
-        osca.calls = list(bod = bod, orm = orm),
-        osca.files = setdiff(list.files(), preexist))
+  stopifnot(is.data.frame(df))
+  stopifnot(all(colnames(df)[1:2] == c('FID', 'IID')))
+  stopifnot(sub(".*(\\.txt)$", "\\1", filename) == ".txt")
+  
+  file.no.suffix <- sub("\\.txt$", "", filename)
+  myprofile <- paste0(file.no.suffix, "-myprofile")
+  myorm <- paste0(file.no.suffix, "-myorm")
+  preexist <- list.files()
+  
+  msg("Writing ORM data to text file:", filename)
+  data.table::fwrite(df, 
+                     file = filename, 
+                     sep=' ', 
+                     row.names = F, 
+                     col.names = T)
+  
+  msg("Using osca to make bod files:", myprofile)
+  bod <- paste0("osca --efile ", filename,  
+                " --methylation-beta --make-bod --out ", myprofile)	
+  ret = system(bod)
+  if (ret != 0) {
+    print(bod)
+    stop("OSCA MAKE-BOD failed with return code: ", ret)
+  }
+  
+  msg("Using osca to make orm files:", myorm)		
+  orm <- paste0("osca --befile ", myprofile,
+                " --make-orm --out ", myorm)
+  ret = system(orm)
+  if (ret != 0) {
+    print(orm)
+    stop("OSCA MAKE-ORM failed with return code: ", ret)
+  }
+  
+  list(filename = filename,
+       myorm = myorm,
+       osca.calls = list(bod = bod, orm = orm),
+       osca.files = setdiff(list.files(), preexist))
 }
