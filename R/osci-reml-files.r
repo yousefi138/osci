@@ -16,9 +16,11 @@ osci.reml.files = function (myorm, pheno, out) {
   preexist = list.files(dirname(out), full.names=T)
   msg("Using osca to run reml for:", myorm)
   reml <- paste0(
-    "osca --reml --orm ", myorm,
+    options("osci.cmd"),
+    " --reml --orm ", myorm,
     " --pheno ", pheno,
     " --out ", out)
+  check.osca()
   ret = system(reml)
   if (ret != 0) {
     print(reml)

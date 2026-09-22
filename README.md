@@ -12,3 +12,5 @@ To install `osci` run:
 remotes::install_github("yousefi138/osci")
 ```
 
+OSCA can be run either directly in the user's environment 
+or within an apptainer container ([instructions](container/readme.md)). 

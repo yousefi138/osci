@@ -34,8 +34,11 @@ osci.write.orm <- function(df, filename){
                      col.names = T)
   
   msg("Using osca to make bod files:", myprofile)
-  bod <- paste0("osca --efile ", filename,  
-                " --methylation-beta --make-bod --out ", myprofile)	
+  bod <- paste0(
+    options("osci.cmd"),
+    " --efile ", filename,  
+    " --methylation-beta --make-bod --out ", myprofile)	
+  check.osca()
   ret = system(bod)
   if (ret != 0) {
     print(bod)
@@ -43,8 +46,10 @@ osci.write.orm <- function(df, filename){
   }
   
   msg("Using osca to make orm files:", myorm)		
-  orm <- paste0("osca --befile ", myprofile,
-                " --make-orm --out ", myorm)
+  orm <- paste0(
+    options("osci.cmd"),
+    " --befile ", myprofile,
+    " --make-orm --out ", myorm)
   ret = system(orm)
   if (ret != 0) {
     print(orm)

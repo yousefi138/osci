@@ -15,9 +15,11 @@ osci.reml.multi.files = function(file.list, pheno, out) {
   preexist = list.files(dirname(out),full.names=T)
   osci:::msg("Using osca to run multi-orm reml for orms in:", file.list)
   reml <- paste0(
-    "osca --reml --multi-orm ", file.list,
+    options("osci.cmd"),
+    " --reml --multi-orm ", file.list,
     " --pheno ", pheno,
     " --out ", out)
+  check.osca()
   ret = system(reml)
   if (ret != 0) {
     print(reml)

@@ -1,0 +1,157 @@
+Bootstrap: docker
+From: ubuntu:24.04
+
+
+%files
+    install-r-packages.r /opt/install-r-packages.r
+    
+%post
+    set -e
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    cat > /opt/osca_env.sh << 'EOF'
+export EIGEN_PATH=/opt/eigen
+export MKLROOT=/opt/intel/oneapi/mkl/latest
+export MKL_INCLUDE=${MKLROOT}/include
+export MKL_LIB=${MKLROOT}/lib/intel64
+export CFLAGS="-m64 -I${MKL_INCLUDE}"
+export CXXFLAGS=$CFLAGS
+export RMATH_PATH=/opt/rmath
+export RMATH_INCLUDE=${RMATH_PATH}/include
+export RMATH_LIB=${RMATH_PATH}/lib
+export LD_LIBRARY_PATH=${MKL_LIB}:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${RMATH_LIB}:${LD_LIBRARY_PATH}
+export TZ=Etc/UTC
+EOF
+    . /opt/osca_env.sh
+
+    ## install library build tools (see MKL and Rmath below)
+    apt-get update -y
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+        gfortran \
+        git \
+        gnupg \
+        htop \
+        less \
+        libcairo2 \
+        libcairo2-dev \
+        libcurl4-openssl-dev \
+        libdbus-glib-1-dev \
+        libfontconfig1-dev \
+        libfreetype6-dev \
+        libfribidi-dev \
+        libgirepository1.0-dev \
+        libgsl-dev \
+        libharfbuzz-dev \
+        libjpeg-dev \
+        libmagick++-dev \
+        libpng-dev \
+        libssl-dev \
+        libtiff5-dev \
+        libuv1-dev \
+        libxml2-dev \
+        lsb-release \
+        man-db \
+        nscd \
+        pkg-config \
+        software-properties-common \
+        sudo \
+        tree \
+        uuid-dev \
+        vim \
+        virtualenv \
+        wget \
+        zlib1g-dev
+
+    ## install R
+    R_VERSION=4.6.1
+    R_URL=https://cdn.posit.co/r/ubuntu-2404/pkgs/r-${R_VERSION}_1_$(dpkg --print-architecture).deb
+    curl -o r-461.deb -L ${R_URL} && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -f -y ./r-461.deb && \
+        rm r-461.deb
+
+    ln -s /opt/R/${R_VERSION}/bin/R /usr/local/bin/R
+    ln -s /opt/R/${R_VERSION}/bin/Rscript /usr/local/bin/Rscript   
+
+    ## install R packages
+    /usr/local/bin/Rscript /opt/install-r-packages.r
+
+    ## install eigen headers
+    EIGEN_VERSION=3.3.7
+    EIGEN=eigen-${EIGEN_VERSION}
+    EIGEN_URL=https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/${EIGEN}.tar.gz
+    mkdir -p ${EIGEN_PATH}
+    (cd ${EIGEN_PATH}; wget -q ${EIGEN_URL} && \
+        tar -xzf ${EIGEN}.tar.gz && \
+        rm ${EIGEN}.tar.gz)
+    ln -s ${EIGEN_PATH}/${EIGEN} ${EIGEN_PATH}/current
+
+    ## install rmath libraries
+    apt-get install -y --no-install-recommends \
+        libbz2-dev \
+        liblzma-dev \
+        libpcre2-dev \
+        libpcre3-dev \
+        libcurl4-openssl-dev \
+        tzdata
+    RMATH=R-4.6.1
+    RMATH_URL=https://cloud.r-project.org/src/base/R-4/${RMATH}.tar.gz
+    wget -q ${RMATH_URL} 
+    tar -xzf ${RMATH}.tar.gz
+    (cd ${RMATH}; ./configure --prefix=${RMATH_PATH} --with-readline=no --with-x=no --with-tcltk=no)
+    (cd ${RMATH}/src/nmath/standalone && \
+        make && \
+        make install)
+    rm -rf ${RMATH} ${RMATH}.tar.gz
+
+    ## install mlk libraries
+    INTEL_KEY_URL=https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+    INTEL_GPG_PATH=/usr/share/keyrings/oneapi-archive-keyring.gpg
+    INTEL_APT_URL=https://apt.repos.intel.com/oneapi
+    wget -qO- ${INTEL_KEY_URL} | gpg --dearmor | tee ${INTEL_GPG_PATH} > /dev/null
+    echo "deb [signed-by=${INTEL_GPG_PATH}] ${INTEL_APT_URL} all main" \
+      | tee /etc/apt/sources.list.d/oneAPI.list
+    cat /etc/apt/sources.list.d/oneAPI.list
+    apt update -y
+    apt install -y intel-oneapi-mkl intel-oneapi-mkl-devel
+
+    ## build and install osca
+    git clone https://github.com/jianyangqt/osca.git
+    (cd osca; \
+        sed -i \
+           's/-lmkl_core -lpthread -lmkl_gnu_thread -lmkl_intel_lp64/-lmkl_rt -lpthread/' \
+            Makefile && \
+        make \
+            EIGEN_PATH=${EIGEN_PATH}/current \
+            MKL_INCLUDE=${MKL_INCLUDE} \
+            MKL_LIB=${MKL_LIB} \
+            Rmath_INCLUDE=${RMATH_INCLUDE} \
+            Rmath_LIB=${RMATH_LIB} \
+            UID_INCLUDE=/usr/include/uuid \
+            UID_LIB=/usr/lib/x86_64-linux-gnu && \
+        cp osca /usr/local/bin/ && \
+        chmod +x /usr/local/bin/osca)
+    rm -rf osca osca.log
+ 
+    ## clean up
+    apt-get autoremove -y
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%environment
+    export LC_ALL=C
+    . /opt/osca_env.sh
+
+%runscript
+    exec "$@"
+
+%labels
+    Author Matthew Suderman
+    Version v1.0
+    Description OSCA 1.22, R 4.6.1 and osci
+
