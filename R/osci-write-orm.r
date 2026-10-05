@@ -29,7 +29,9 @@ osci.write.orm <- function(df, filename){
   msg("Writing ORM data to text file:", filename)
   data.table::fwrite(df, 
                      file = filename, 
-                     sep=' ', 
+                     sep=' ',
+                     na='NA',
+                     quote=F,
                      row.names = F, 
                      col.names = T)
   

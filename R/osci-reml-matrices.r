@@ -5,6 +5,7 @@
 #'
 #' @param var A numeric phenotype vector or matrix with samples in rows and phenotypes in columns.
 #' @param ... Named omic matrices, one matrix per omic, with samples in columns and features in rows.
+#' @param impute Logical, whether to impute missing values (feature mean) in the omic matrices. Default is TRUE.
 #' @param tmp_dir Optional temporary directory for OSCA input and output files. If NULL,
 #' a temporary directory will be created using tempfile().
 #' @return A list with three elements
@@ -12,7 +13,7 @@
 #' results across phenotypes and omics.
 #'
 #' @export
-osci.reml.matrices = function(var,...,tmp_dir=NULL) {
+osci.reml.matrices = function(var,...,impute=T,tmp_dir=NULL) {
   ## list of omics
   omics = list(...)
   ## check inputs
@@ -32,6 +33,17 @@ osci.reml.matrices = function(var,...,tmp_dir=NULL) {
   ## omic relationship matrix files
   orm_fns = file.path(tmp_dir, paste0(names(omics),"-orm.txt"))
   for (i in 1:length(omics)) {
+    if (impute) {
+      n.missing = sum(is.na(omics[[i]]))
+      if (n.missing > 0) {
+        f.missing = sum(apply(omics[[i]],1,function(x) any(is.na(x))))
+        s.missing = sum(apply(omics[[i]],2,function(x) any(is.na(x))))
+        cat("Imputing",n.missing,"missing values",
+            "for",f.missing,"molecular features",
+            "and",s.missing,"samples in omic matrix", names(omics)[i], "\n")
+        omics[[i]] = impute.matrix(omics[[i]], margin=1)
+      }
+    }
     bin_fn = paste0(orm_fns[i],"-myorm.orm.bin")
     if (file.exists(bin_fn)) {
       cat("Using existing ORM file:", bin_fn, "\n")

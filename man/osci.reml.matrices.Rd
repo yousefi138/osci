@@ -4,12 +4,14 @@
 \alias{osci.reml.matrices}
 \title{Run OSCA REML analysis (R variable interface)}
 \usage{
-osci.reml.matrices(var, ..., tmp_dir = NULL)
+osci.reml.matrices(var, ..., impute = T, tmp_dir = NULL)
 }
 \arguments{
 \item{var}{A numeric phenotype vector or matrix with samples in rows and phenotypes in columns.}
 
 \item{...}{Named omic matrices, one matrix per omic, with samples in columns and features in rows.}
+
+\item{impute}{Logical, whether to impute missing values (feature mean) in the omic matrices. Default is TRUE.}
 
 \item{tmp_dir}{Optional temporary directory for OSCA input and output files. If NULL,
 a temporary directory will be created using tempfile().}
