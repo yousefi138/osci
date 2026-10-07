@@ -6,11 +6,11 @@ Described in:
 
 The package depends on having OSCA installed on your machine, which is available for download here: https://yanglab.westlake.edu.cn/software/osca/#Download.
 
-To install `osci` run:
+To install `osci` run the following in R:
 
 ```
 remotes::install_github("yousefi138/osci")
 ```
 
 OSCA can be run either directly in the user's environment 
-or within an apptainer container ([instructions](container/readme.md)). 
+or within an apptainer container (see [instructions](container/readme.md)). 
