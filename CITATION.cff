@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+type: software
+title: "osci: An R wrapper for OSCA (OmicS-data-based Complex trait Analysis)"
+authors:
+  - family-names: "Yousefi"
+    given-names: "Paul"
+    email: "paul.yousefi@bristol.ac.uk"
+    orcid: "https://orcid.org/0000-0003-3284-3240"
+  - family-names: "Suderman"
+    given-names: "Matthew"
+    email: "matthew.suderman@bristol.ac.uk"
+    orcid: "https://orcid.org/0000-0002-2715-9930"
+description: "An R wrapper for OSCA (OmicS-data-based Complex trait Analysis)"
+repository-code: "https://github.com/yousefi138/osci"
+version: "0.3.0"
+date-released: 2025-03-27
+license: "Artistic-2.0"
+keywords:
+  - "OSCA"
+  - "complex trait analysis"
+  - "omics"
+  - "genetics"
